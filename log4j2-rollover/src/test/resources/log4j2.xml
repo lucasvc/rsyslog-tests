@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration status="error" name="mylogging"
+	packages="com.github.lucasvc.rsyslog_tests.log4j2_rollover">
+	<appenders>
+		<RollingFile fileName="${sys:outputDir}/main.log"
+			filePattern="${sys:outputDir}/main.log-%i" name="FILE">
+			<filters>
+				<ThresholdFilter level="INFO" onMatch="ACCEPT"
+					onMismatch="DENY" />
+			</filters>
+			<PatternLayout>
+				<pattern>%d{dd MMM yyyy HH:mm:ss}-[%p][%c{1}]- %m%n</pattern>
+			</PatternLayout>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10 MB" />
+			</Policies>
+		</RollingFile>
+		<RollingRandomAccessFile append="true"
+			fileName="${sys:outputDir}/${sys:fileName}" filePattern="${sys:outputDir}/${sys:fileName}.%i"
+			name="json-log">
+			<DefaultRolloverStrategy fileIndex="max" max="10" />
+			<filters>
+				<ThresholdFilter level="INFO" onMatch="ACCEPT"
+					onMismatch="DENY" />
+			</filters>
+			<SingleLineJsonLayout charset="UTF-8" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10 MB" />
+			</Policies>
+		</RollingRandomAccessFile>
+	</appenders>
+	<loggers>
+		<logger additivity="false" level="debug" name="services">
+			<appender-ref ref="json-log" />
+		</logger>
+		<root level="DEBUG">
+			<appender-ref ref="FILE" />
+		</root>
+	</loggers>
+</configuration>

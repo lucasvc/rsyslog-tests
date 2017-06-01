@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  splunk:
+    build: .
+    hostname: splunk
+    environment:
+      SPLUNK_START_ARGS: --accept-license --answer-yes
+      SPLUNK_ENABLE_LISTEN: 9997
+      SPLUNK_ADD: tcp 1514
+      SPLUNK_USER: root
+    ports:
+      - "7000:8000"
+      - "7514:1514"
