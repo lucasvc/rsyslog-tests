@@ -2,6 +2,7 @@ package com.github.lucasvc.rsyslog_tests.log4j2_rollover;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,7 +33,7 @@ public class LoggingRollover {
 		final Logger logger = LogManager.getLogger("services");
 		final AtomicInteger trace = new AtomicInteger(0);
 		final AtomicBoolean stop = new AtomicBoolean(false);
-		final int rolls = 5;
+		final int rolls = 10;
 		int threads = 10;
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
 		executor.submit(new Runnable() {
@@ -83,10 +84,16 @@ public class LoggingRollover {
 		int actual = -1;
 		do {
 			Thread.sleep(1000);
-			actual = Files.readAllLines(Paths.get("rsyslog/output/recieved.log"), StandardCharsets.UTF_8).size();
+			actual = getActualLines();
 		} while (actual < expected);
+		Thread.sleep(1000);
+		actual = getActualLines();
 		if (expected < actual)
 			throw new AssertionError("Expected '" + expected + "' lines but got '" + actual + "'");
+	}
+
+	private static int getActualLines() throws IOException {
+		return Files.readAllLines(Paths.get("rsyslog/output/recieved.log"), StandardCharsets.UTF_8).size();
 	}
 
 	private static String generateRand(int length) {
