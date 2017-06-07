@@ -2,7 +2,11 @@ package com.github.lucasvc.rsyslog_tests.log4j2_rollover;
 
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.time.Instant;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.TimeZone;
 
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -19,6 +23,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SingleLineJsonLayout extends AbstractStringLayout {
 
 	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final DateFormat DATETIME_FORMAT;
+	static {
+		DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		DATETIME_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+	}
 
 	public static class Builder<B extends Builder<B>> extends AbstractStringLayout.Builder<B>
 			implements org.apache.logging.log4j.core.util.Builder<SingleLineJsonLayout> {
@@ -44,12 +53,15 @@ public class SingleLineJsonLayout extends AbstractStringLayout {
 		StringWriter writer = new StringWriter();
 		try {
 			MapMessage message = (MapMessage) event.getMessage();
-			message.put("level", event.getLevel().name());
-			message.put("@timestamp", Instant.now().toString());
-			mapper.writeValue(writer, message.getData());
+			LinkedHashMap<String, Object> payload = new LinkedHashMap<>();
+			payload.put("@timestamp", DATETIME_FORMAT.format(new Date()));
+			payload.put("level", event.getLevel().name());
+			payload.putAll(message.getData());
+			mapper.writeValue(writer, payload);
 			writer.append("\n");
 			return writer.toString();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return Strings.EMPTY;
 		}
 	}
