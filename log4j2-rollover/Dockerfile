@@ -23,6 +23,7 @@ ADD src src
 RUN mkdir -p build/logs rsyslog/config rsyslog/temp
 ADD config rsyslog/config
 RUN mv rsyslog/config/main_rsyslog.conf /etc/rsyslog.d/main_rsyslog.conf
+ADD inodes.sh inodes.sh
 
 ENV RSYSLOG_DEBUGLOG="/app/rsyslog/debug.log"
 ENV RSYSLOG_DEBUG="DebugOnDemand NoStdOut"
